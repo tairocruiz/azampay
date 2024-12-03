@@ -3,7 +3,7 @@
     "description": "A package library for integrating your composer/php-based project with AzamPay",
     "type": "library",
     "require": {
-        "guzzlehttp/guzzle": "8.0.x-dev"
+        "guzzlehttp/guzzle": "7.9.0"
     },
     "license": "MIT",
     "autoload": {

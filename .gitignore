@@ -1,3 +1,5 @@
 /public
 tester.php
 /logs
+/vendor
+.gitignore

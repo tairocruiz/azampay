@@ -87,7 +87,7 @@ final class Utils
     {
         $handler = null;
 
-        if (\defined('CURLOPT_CUSTOMREQUEST')) {
+        if (\defined('CURLOPT_CUSTOMREQUEST') && \function_exists('curl_version') && version_compare(curl_version()['version'], '7.34') >= 0) {
             if (\function_exists('curl_multi_exec') && \function_exists('curl_exec')) {
                 $handler = Proxy::wrapSync(new CurlMultiHandler(), new CurlHandler());
             } elseif (\function_exists('curl_exec')) {
@@ -114,6 +114,77 @@ final class Utils
     public static function defaultUserAgent(): string
     {
         return sprintf('GuzzleHttp/%d', ClientInterface::MAJOR_VERSION);
+    }
+
+    /**
+     * Returns the default cacert bundle for the current system.
+     *
+     * First, the openssl.cafile and curl.cainfo php.ini settings are checked.
+     * If those settings are not configured, then the common locations for
+     * bundles found on Red Hat, CentOS, Fedora, Ubuntu, Debian, FreeBSD, OS X
+     * and Windows are checked. If any of these file locations are found on
+     * disk, they will be utilized.
+     *
+     * Note: the result of this function is cached for subsequent calls.
+     *
+     * @throws \RuntimeException if no bundle can be found.
+     *
+     * @deprecated Utils::defaultCaBundle will be removed in guzzlehttp/guzzle:8.0. This method is not needed in PHP 5.6+.
+     */
+    public static function defaultCaBundle(): string
+    {
+        static $cached = null;
+        static $cafiles = [
+            // Red Hat, CentOS, Fedora (provided by the ca-certificates package)
+            '/etc/pki/tls/certs/ca-bundle.crt',
+            // Ubuntu, Debian (provided by the ca-certificates package)
+            '/etc/ssl/certs/ca-certificates.crt',
+            // FreeBSD (provided by the ca_root_nss package)
+            '/usr/local/share/certs/ca-root-nss.crt',
+            // SLES 12 (provided by the ca-certificates package)
+            '/var/lib/ca-certificates/ca-bundle.pem',
+            // OS X provided by homebrew (using the default path)
+            '/usr/local/etc/openssl/cert.pem',
+            // Google app engine
+            '/etc/ca-certificates.crt',
+            // Windows?
+            'C:\\windows\\system32\\curl-ca-bundle.crt',
+            'C:\\windows\\curl-ca-bundle.crt',
+        ];
+
+        if ($cached) {
+            return $cached;
+        }
+
+        if ($ca = \ini_get('openssl.cafile')) {
+            return $cached = $ca;
+        }
+
+        if ($ca = \ini_get('curl.cainfo')) {
+            return $cached = $ca;
+        }
+
+        foreach ($cafiles as $filename) {
+            if (\file_exists($filename)) {
+                return $cached = $filename;
+            }
+        }
+
+        throw new \RuntimeException(
+            <<< EOT
+No system CA bundle could be found in any of the the common system locations.
+PHP versions earlier than 5.6 are not properly configured to use the system's
+CA bundle by default. In order to verify peer certificates, you will need to
+supply the path on disk to a certificate bundle to the 'verify' request
+option: https://docs.guzzlephp.org/en/latest/request-options.html#verify. If
+you do not need a specific certificate bundle, then Mozilla provides a commonly
+used CA bundle which can be downloaded here (provided by the maintainer of
+cURL): https://curl.haxx.se/ca/cacert.pem. Once you have a CA bundle available
+on disk, you can set the 'openssl.cafile' PHP ini setting to point to the path
+to the file, allowing you to omit the 'verify' request option. See
+https://curl.haxx.se/docs/sslcerts.html for more information.
+EOT
+        );
     }
 
     /**
@@ -201,11 +272,12 @@ final class Utils
      */
     public static function jsonDecode(string $json, bool $assoc = false, int $depth = 512, int $options = 0)
     {
-        try {
-            return \json_decode($json, $assoc, $depth, $options | \JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e) {
-            throw new InvalidArgumentException('json_decode error: '.$e->getMessage(), 0, $e);
+        $data = \json_decode($json, $assoc, $depth, $options);
+        if (\JSON_ERROR_NONE !== \json_last_error()) {
+            throw new InvalidArgumentException('json_decode error: '.\json_last_error_msg());
         }
+
+        return $data;
     }
 
     /**
@@ -221,11 +293,13 @@ final class Utils
      */
     public static function jsonEncode($value, int $options = 0, int $depth = 512): string
     {
-        try {
-            return \json_encode($value, $options | \JSON_THROW_ON_ERROR, $depth);
-        } catch (\JsonException $e) {
-            throw new InvalidArgumentException('json_encode error: '.$e->getMessage(), 0, $e);
+        $json = \json_encode($value, $options, $depth);
+        if (\JSON_ERROR_NONE !== \json_last_error()) {
+            throw new InvalidArgumentException('json_encode error: '.\json_last_error_msg());
         }
+
+        /** @var string */
+        return $json;
     }
 
     /**

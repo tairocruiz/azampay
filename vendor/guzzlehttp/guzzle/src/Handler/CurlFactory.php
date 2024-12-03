@@ -11,6 +11,7 @@ use GuzzleHttp\Psr7\LazyOpenStream;
 use GuzzleHttp\TransferStats;
 use GuzzleHttp\Utils;
 use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\UriInterface;
 
 /**
  * Creates curl resources from a request
@@ -20,6 +21,11 @@ use Psr\Http\Message\RequestInterface;
 class CurlFactory implements CurlFactoryInterface
 {
     public const CURL_VERSION_STR = 'curl_version';
+
+    /**
+     * @deprecated
+     */
+    public const LOW_CURL_VERSION_NUMBER = '7.21.2';
 
     /**
      * @var resource[]|\CurlHandle[]
@@ -246,15 +252,22 @@ class CurlFactory implements CurlFactoryInterface
             );
         }
 
+        $uri = $easy->request->getUri();
+
+        $sanitizedError = self::sanitizeCurlError($ctx['error'] ?? '', $uri);
+
         $message = \sprintf(
             'cURL error %s: %s (%s)',
             $ctx['errno'],
-            $ctx['error'],
+            $sanitizedError,
             'see https://curl.haxx.se/libcurl/c/libcurl-errors.html'
         );
-        $uriString = (string) $easy->request->getUri();
-        if ($uriString !== '' && false === \strpos($ctx['error'], $uriString)) {
-            $message .= \sprintf(' for %s', $uriString);
+
+        if ('' !== $sanitizedError) {
+            $redactedUriString = \GuzzleHttp\Psr7\Utils::redactUserInfo($uri)->__toString();
+            if ($redactedUriString !== '' && false === \strpos($sanitizedError, $redactedUriString)) {
+                $message .= \sprintf(' for %s', $redactedUriString);
+            }
         }
 
         // Create a connection exception if it was a specific error code.
@@ -263,6 +276,24 @@ class CurlFactory implements CurlFactoryInterface
             : new RequestException($message, $easy->request, $easy->response, null, $ctx);
 
         return P\Create::rejectionFor($error);
+    }
+
+    private static function sanitizeCurlError(string $error, UriInterface $uri): string
+    {
+        if ('' === $error) {
+            return $error;
+        }
+
+        $baseUri = $uri->withQuery('')->withFragment('');
+        $baseUriString = $baseUri->__toString();
+
+        if ('' === $baseUriString) {
+            return $error;
+        }
+
+        $redactedUriString = \GuzzleHttp\Psr7\Utils::redactUserInfo($baseUri)->__toString();
+
+        return str_replace($baseUriString, $redactedUriString, $error);
     }
 
     /**
@@ -443,8 +474,10 @@ class CurlFactory implements CurlFactoryInterface
                 // The empty string enables all available decoders and implicitly
                 // sets a matching 'Accept-Encoding' header.
                 $conf[\CURLOPT_ENCODING] = '';
-                // But as the user did not specify any acceptable encodings we need
-                // to overwrite this implicit header with an empty one.
+                // But as the user did not specify any encoding preference,
+                // let's leave it up to server by preventing curl from sending
+                // the header, which will be interpreted as 'Accept-Encoding: *'.
+                // https://www.rfc-editor.org/rfc/rfc9110#field.accept-encoding
                 $conf[\CURLOPT_HTTPHEADER][] = 'Accept-Encoding:';
             }
         }
