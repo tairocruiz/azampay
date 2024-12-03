@@ -17,5 +17,5 @@
             "email": "tairocruise@yahoo.com"
         }
     ],
-    "minimum-stability": "dev"
+    "minimum-stability": "stable"
 }
