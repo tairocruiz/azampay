@@ -74,6 +74,56 @@ $azampay = new AzampayService(
     service: 'MERCHANT'
 );
 ```
+
+## Usage
+### Initiate Payment and Checkout
+```php
+try {
+    $azampay = new AzampayService(
+        $app,     // App Name
+        $clientId,    // Client ID
+        $secret,// Client Secret
+        'SANDBOX',         // Environment (SANDBOX/PRODUCTION)
+        'MNO'              // Service (MNO, BANK, MERCHANT)
+    );
+
+    // Example of calling the checkout method for MNO
+    $payload = [
+        'amount' => 5000,
+        'accountNumber' => '255713295803',
+        'provider' => 'Tigo',
+        'additionalProperties' => [
+                'router' => "Home",
+                'mac' => "A6:47:F6:52:38:D5",
+            ],
+    ];
+
+    $response = $azampay->checkout($payload);
+
+    // Decode the initial response
+    $decodedResponse = json_decode($response, true);
+
+    if ($decodedResponse && isset($decodedResponse['rawResponse'])) {
+        // Decode the `rawResponse` field
+        $decodedRawResponse = json_decode($decodedResponse['rawResponse'], true);
+
+        if ($decodedRawResponse) {
+            // Replace the `rawResponse` with the decoded version
+            $decodedResponse['rawResponse'] = $decodedRawResponse;
+        }
+    }
+
+    // Output the final JSON response
+    header('Content-Type: application/json');
+    echo json_encode($decodedResponse, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+
+} catch (Exception $e) {
+    echo "Error: " . $e->getMessage();
+}
+```
+
+
+
 ## Contributing
 
 1. Fork the repository
