@@ -78,16 +78,22 @@ $azampay = new AzampayService(
 ## Usage
 ### Initiate Payment and Checkout
 ```php
+// vendor credentials
+$app = 'YOUR_APP_NAME';
+$clientId = 'YOUR_CLIENT_ID';
+$secret = 'YOUR_SECRET_KEY';
+
+
 try {
-    $azampay = new AzampayService(
-        $app,     // App Name
-        $clientId,    // Client ID
-        $secret,// Client Secret
-        'SANDBOX',         // Environment (SANDBOX/PRODUCTION)
-        'MNO'              // Service (MNO, BANK, MERCHANT)
+     $azampay = new AzampayService(
+        $app, // App Name
+        $clientId, // Client ID
+        $secret, // Client Secret
+        'SANDBOX', // Environment (SANDBOX/PRODUCTION)
+        'MNO', // Service (MNO, BANK, MERCHANT)
     );
 
-    // Example of calling the checkout method for MNO
+    // Example of calling the checkout method for MNO [MOBILE PAYMENT]
     $payload = [
         'amount' => 5000,
         'accountNumber' => '255713295803',
@@ -100,22 +106,9 @@ try {
 
     $response = $azampay->checkout($payload);
 
-    // Decode the initial response
-    $decodedResponse = json_decode($response, true);
-
-    if ($decodedResponse && isset($decodedResponse['rawResponse'])) {
-        // Decode the `rawResponse` field
-        $decodedRawResponse = json_decode($decodedResponse['rawResponse'], true);
-
-        if ($decodedRawResponse) {
-            // Replace the `rawResponse` with the decoded version
-            $decodedResponse['rawResponse'] = $decodedRawResponse;
-        }
-    }
-
     // Output the final JSON response
     header('Content-Type: application/json');
-    echo json_encode($decodedResponse, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
 
 } catch (Exception $e) {
     echo "Error: " . $e->getMessage();
@@ -141,7 +134,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Support
 For any issues or questions, please open an issue on the GitHub repository.
-```markdown:CHANGELOG.md
+
 # Changelog
 
 All notable changes to this project will be documented in this file.
@@ -158,6 +151,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for Merchant services
 - Environment switching capability
 - Flexible service selection
-```
+
 
 

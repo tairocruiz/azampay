@@ -9,13 +9,13 @@ use Exception;
 
 final class AzampayService
 {
-    private $appName;
-    private $clientId;
-    private $secret;
-    private $env;
-    private $service;
+    private string $appName;
+    private string $clientId;
+    private string $secret;
+    private string $env;
+    private string $service;
 
-    private $serviceInstance;
+    private object $serviceInstance;
 
     /**
      * AzampayService constructor.
@@ -32,10 +32,19 @@ final class AzampayService
         $this->appName = $appName;
         $this->clientId = $clientId;
         $this->secret = $secret;
-        $this->env = $env;
+        $this->env = strtoupper($env);
         $this->service = strtoupper($service);
 
-        // Initialize the appropriate service instance
+        $this->initializeServiceInstance();
+    }
+
+    /**
+     * Initialize the appropriate service instance lazily.
+     *
+     * @throws Exception
+     */
+    private function initializeServiceInstance(): void
+    {
         switch ($this->service) {
             case 'MNO':
                 $this->serviceInstance = new MNOServices($this->appName, $this->clientId, $this->secret, $this->env);
@@ -62,13 +71,8 @@ final class AzampayService
     public function __call(string $method, array $arguments)
     {
         if (method_exists($this->serviceInstance, $method)) {
-            // Inject credentials if the method requires it
-            if (method_exists($this->serviceInstance, 'setCredentials')) {
-                $mt = 'setCredentials';
-                $this->serviceInstance->$mt($this->appName, $this->clientId, $this->secret, $this->env);
-            }
-
-            return call_user_func_array([$this->serviceInstance, $method], $arguments);
+            // Skip unnecessary checks and directly call the method
+            return $this->serviceInstance->$method(...$arguments);
         }
 
         throw new Exception("Method {$method} does not exist on the {$this->service} service.");

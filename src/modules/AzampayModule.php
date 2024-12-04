@@ -4,120 +4,86 @@ namespace Taitech\Azampay\Modules;
 
 use Exception;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
 
 /**
  * The base class of everything
  */
 
-class AzampayModule
-{
+ class AzampayModule
+ {
+    private const BASE_URL = "https://checkout.azampay.co.tz";
 
-    protected const BASE_URL = "https://checkout.azampay.co.tz";
+    private const AUTH_URL = "https://authenticator.azampay.co.tz";
 
-    protected const AUTH_URL = "https://authenticator.azampay.co.tz";
+    private const SANDBOX_BASE_URL = "https://sandbox.azampay.co.tz";
 
-    protected const SANDBOX_BASE_URL = "https://sandbox.azampay.co.tz";
+    private const SANDBOX_AUTH_URL = "https://authenticator-sandbox.azampay.co.tz";
+ 
+     private string $app;
+     private string $clientId;
+     private string $secret;
+     private string $env;
+     protected Client $httpClient;
+ 
+     public function __construct(string $app, string $clientId, string $secret, string $env = 'SANDBOX')
+     {
+         $this->app = $app;
+         $this->clientId = $clientId;
+         $this->secret = $secret;
+         $this->env = strtoupper($env);
+         $this->httpClient = new Client(['timeout' => 30, 'keep_alive' => true]);
+     }
+ 
+     /**
+      * Generate a Token
+      *
+      * @return string
+      * @throws Exception
+      */
+     public function generateToken(): string
+     {
+         $url = $this->getEnvironmentUrl('auth');
+ 
+         try {
+             $response = $this->httpClient->post($url . '/AppRegistration/GenerateToken', [
+                 'headers' => ['Content-Type' => 'application/json'],
+                 'json' => [
+                     'appName' => $this->app,
+                     'clientId' => $this->clientId,
+                     'clientSecret' => $this->secret,
+                 ],
+             ]);
+ 
+             $data = json_decode($response->getBody(), true);
+ 
+             if (isset($data['data']['accessToken'])) {
+                 return $data['data']['accessToken'];
+             }
+ 
+             throw new Exception('Token generation failed: Missing token in response.');
+         } catch (RequestException $e) {
+             throw new Exception('HTTP Request failed: ' . $e->getMessage());
+         } catch (Exception $e) {
+             throw new Exception('Token generation error: ' . $e->getMessage());
+         }
+     }
 
-    protected const SANDBOX_AUTH_URL = "https://authenticator-sandbox.azampay.co.tz";
 
-    protected $appName;
-    protected $clientId;
-    protected $clientSecret;
-    protected $env;
-    protected $client;
 
-    public function __construct(string $appName, string $clientId, string $clientSecret)
-    {
-        $this->appName = $appName;
-        $this->clientId = $clientId;
-        $this->clientSecret = $clientSecret;
-        $this->client = new Client();
-    }
 
-   
-    public function generateToken($env = 'SANDBOX'){
-        
-        try {
-            $response = $this->client->post($this->getEnvironmentUrl($env) . '/AppRegistration/GenerateToken', [
-                'json' => [
-                    'appName' => $this->appName,
-                    'clientId' => $this->clientId,
-                    'clientSecret' => $this->clientSecret,
-                ],
-            ]);
-
-            $data = json_decode($response->getBody(), true);
-            // return $data;
-            
-            if (isset($data['data']['accessToken'])) {
-                return $data['data']['accessToken'];
-            } else {
-                throw new Exception('Unable to retrieve authentication token.');
-            }
-        } catch (Exception $e) {
-            throw new Exception('Error retrieving authentication token: ' . $e->getMessage());
-        }
-    }
-
-    public function getEnvironmentBaseUrl($env)
-    {
-        return strtolower($env) === 'production' || strtolower($env) === 'live'
-            ? self::BASE_URL
-            : self::SANDBOX_BASE_URL;
-    }
-
-    public function getEnvironmentUrl($env)
-    {
-        return strtolower($env) === 'production' || strtolower($env) === 'live'
-            ? self::AUTH_URL
-            : self::SANDBOX_AUTH_URL;
-    }
-
-    
-
-    public function tokenGeneratorWithCURL(string $appName, string $clientId, string $secret, $env = 'SANDBOX'){
-        $url = '';
-        if ($env == 'PRODUCTION' || $env == 'production' || $env == 'live' || $env == 'LIVE') {
-           $url = self::AUTH_URL;
-        } else {
-            $url = self::SANDBOX_AUTH_URL;
-        }
-        
-        try {
-            $data = [
-                'appName' => $appName,
-                'clientId' => $clientId,
-                'clientSecret' => $secret,
-            ];
-        
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, $url . '/AppRegistration/GenerateToken');
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Content-Type: application/json',
-            ]);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-        
-            $response = curl_exec($ch);
-            curl_close($ch);
-        
-            $result = json_decode($response, true);
-            if (isset($result['data']['accessToken'])) {
-                return $result['data']['accessToken'];
-            } else {
-                throw new Exception('Unable to retrieve authentication token.');
-                echo json_encode([
-                    'success' => false,
-                    'message' => 'Failed to retrieve authentication token.',
-                    'details' => $result,
-                ]);
-                exit;
-            }
-        } catch (Exception $e) {
-            throw new Exception('Error retrieving authentication token: ' . $e->getMessage());
-        }
-    }
-
-    
-}
+ 
+     /**
+      * Get the appropriate environment URL
+      *
+      * @param string $type
+      * @return string
+      */
+     protected function getEnvironmentUrl(string $type): string
+     {
+         if ($type === 'auth') {
+             return $this->env === 'SANDBOX' ? self::SANDBOX_AUTH_URL : self::AUTH_URL;
+         }
+         return $this->env === 'SANDBOX' ? self::SANDBOX_BASE_URL : self::BASE_URL;
+     }
+ }

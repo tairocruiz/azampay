@@ -3,7 +3,7 @@
         'name' => 'taitech/azampay',
         'pretty_version' => 'dev-master',
         'version' => 'dev-master',
-        'reference' => 'e801fe2dcc3820487d6a195cd97caf685b4a0c61',
+        'reference' => '9bdaeb9ea480253882ba49eec745f42916befe20',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -11,9 +11,9 @@
     ),
     'versions' => array(
         'guzzlehttp/guzzle' => array(
-            'pretty_version' => '7.9.0',
-            'version' => '7.9.0.0',
-            'reference' => '84ac2b2afc44e40d3e8e658a45d68d6d20437612',
+            'pretty_version' => '7.9.2',
+            'version' => '7.9.2.0',
+            'reference' => 'd281ed313b989f213357e3be1a179f02196ac99b',
             'type' => 'library',
             'install_path' => __DIR__ . '/../guzzlehttp/guzzle',
             'aliases' => array(),
@@ -103,7 +103,7 @@
         'taitech/azampay' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => 'e801fe2dcc3820487d6a195cd97caf685b4a0c61',
+            'reference' => '9bdaeb9ea480253882ba49eec745f42916befe20',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
