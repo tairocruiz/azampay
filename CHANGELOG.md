@@ -1,5 +1,4 @@
 
-```markdown:CHANGELOG.md
 
 # Changelog
 
@@ -17,5 +16,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for Merchant services
 - Environment switching capability
 - Flexible service selection
-
-```
