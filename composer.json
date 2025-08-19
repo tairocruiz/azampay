@@ -4,12 +4,22 @@
     "type": "library",
     "require": {
         "php": "^8.1",
-        "guzzlehttp/guzzle": "^7.5"
+        "guzzlehttp/guzzle": "^7.5",
+        "illuminate/support": "^9.0|^10.0|^11.0",
+        "illuminate/routing": "^9.0|^10.0|^11.0",
+        "illuminate/http": "^9.0|^10.0|^11.0",
+        "illuminate/config": "^9.0|^10.0|^11.0",
+        "spatie/laravel-activitylog": "^4.0"
     },
     "license": "MIT",
     "autoload": {
         "psr-4": {
             "Taitech\\Azampay\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Taitech\\Azampay\\Tests\\": "tests/"
         }
     },
     "authors": [
@@ -18,5 +28,31 @@
             "email": "tairocruise@yahoo.com"
         }
     ],
-    "minimum-stability": "stable"
+    "minimum-stability": "stable",
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Taitech\\Azampay\\Providers\\AzampayServiceProvider"
+            ],
+            "aliases": {
+                "Azampay": "Taitech\\Azampay\\Facades\\AzampayFacade"
+            }
+        }
+    },
+    "conflict": {
+        "laravel/framework": "<9.0"
+    },
+    "suggest": {
+        "laravel/framework": "Required for Laravel integration"
+    },
+    "keywords": [
+        "laravel",
+        "azampay",
+        "payment",
+        "mobile-money",
+        "tanzania",
+        "mno",
+        "bank",
+        "merchant"
+    ]
 }

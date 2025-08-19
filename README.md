@@ -11,11 +11,51 @@ A robust PHP package for seamless integration with Azampay payment services, sup
 - Environment switching (Sandbox/Production)
 - Simple credential management
 - Flexible service selection
+- **Laravel 9.x, 10.x, and 11.x support**
+- **Automatic service discovery and registration**
+- **Built-in facades and dependency injection**
+- **Spatie Activity Log integration for database logging**
+- **Comprehensive payment event tracking**
 
 ## Installation
 
+### Standard Installation
+
 ```bash
 composer require taitech/azampay
+```
+
+### Requirements
+
+- **PHP**: ^8.1
+- **Laravel**: ^9.0|^10.0|^11.0
+- **GuzzleHTTP**: ^7.5
+
+### Laravel Integration
+
+This package is designed to work seamlessly with Laravel applications. For detailed Laravel integration instructions, see [LARAVEL_INTEGRATION.md](LARAVEL_INTEGRATION.md).
+
+**Quick Laravel Setup:**
+
+1. Install the package: `composer require taitech/azampay`
+2. Publish configuration: `php artisan vendor:publish --tag=azampay-config`
+3. Add environment variables to your `.env` file
+4. Include routes: `require base_path('routes/azampay.php');`
+
+**Laravel Usage Examples:**
+
+```php
+// Using the Facade
+use Taitech\Azampay\Facades\Azampay;
+$response = Azampay::checkout($payload);
+
+// Using the Service Container
+$azampay = app('azampay');
+$response = $azampay->checkout($payload);
+
+// Using Dependency Injection
+public function __construct(private AzampayService $azampay) {}
+$response = $this->azampay->checkout($payload);
 ```
 
 ## Quick Start
