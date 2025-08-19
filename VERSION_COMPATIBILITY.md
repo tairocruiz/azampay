@@ -8,7 +8,8 @@ This document outlines the compatibility between the Azampay package and differe
 |----------------|---------|-------------|-------|
 | **9.x** | ✅ **Supported** | ^8.1 | LTS Release |
 | **10.x** | ✅ **Supported** | ^8.1 | LTS Release |
-| **11.x** | ✅ **Supported** | ^8.1 | Latest Release |
+| **11.x** | ✅ **Supported** | ^8.1 | LTS Release |
+| **12.x** | ✅ **Supported** | ^8.1 | Latest Release |
 
 ## PHP Version Support
 
@@ -16,17 +17,17 @@ This document outlines the compatibility between the Azampay package and differe
 |-------------|---------|-----------------|-------|
 | **8.1** | ✅ **Supported** | 9.x, 10.x, 11.x | Minimum Required |
 | **8.2** | ✅ **Supported** | 9.x, 10.x, 11.x | Recommended |
-| **8.3** | ✅ **Supported** | 10.x, 11.x | Latest Stable |
+| **8.3** | ✅ **Supported** | 10.x, 11.x, 12.x | Latest Stable |
 
 ## Package Dependencies
 
 | Package | Version | Purpose |
 |---------|---------|---------|
 | **guzzlehttp/guzzle** | ^7.5 | HTTP client for API calls |
-| **illuminate/support** | ^9.0\|^10.0\|^11.0 | Laravel support features |
-| **illuminate/routing** | ^9.0\|^10.0\|^11.0 | Laravel routing system |
-| **illuminate/http** | ^9.0\|^10.0\|^11.0 | Laravel HTTP handling |
-| **illuminate/config** | ^9.0\|^10.0\|^11.0 | Laravel configuration |
+| **illuminate/support** | ^9.0\|^10.0\|^11.0\|^12.0 | Laravel support features |
+| **illuminate/routing** | ^9.0\|^10.0\|^11.0\|^12.0 | Laravel routing system |
+| **illuminate/http** | ^9.0\|^10.0\|^11.0\|^12.0 | Laravel HTTP handling |
+| **illuminate/config** | ^9.0\|^10.0\|^11.0\|^12.0 | Laravel configuration |
 
 ## Compatibility Notes
 
@@ -48,6 +49,12 @@ This document outlines the compatibility between the Azampay package and differe
 - **PHP Support**: 8.1+
 - **Features**: Full package support
 
+### Laravel 12.x
+- **Release Date**: February 2025
+- **End of Life**: August 2027
+- **PHP Support**: 8.1+
+- **Features**: Full package support
+
 ## Installation Commands
 
 ### Laravel 9.x
@@ -61,6 +68,11 @@ composer require taitech/azampay:^1.0
 ```
 
 ### Laravel 11.x
+```bash
+composer require taitech/azampay:^1.0
+```
+
+### Laravel 12.x
 ```bash
 composer require taitech/azampay:^1.0
 ```
@@ -89,19 +101,22 @@ php artisan test
 
 # Test with Laravel 11.x
 php artisan test
+
+# Test with Laravel 12.x
+php artisan test
 ```
 
 ## Breaking Changes
 
 ### Version 1.0.0
 - **Initial Release**: No breaking changes
-- **Laravel Support**: 9.x, 10.x, 11.x
+- **Laravel Support**: 9.x, 10.x, 11.x, 12.x
 - **PHP Support**: 8.1+
 
 ## Future Compatibility
 
 ### Planned Support
-- **Laravel 12.x**: Will be supported when released
+- **Laravel 13.x**: Will be supported when released
 - **PHP 8.4**: Will be supported when stable
 - **PHP 9.0**: Will be evaluated for compatibility
 

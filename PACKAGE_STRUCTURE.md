@@ -91,7 +91,7 @@ azampay/
 ## Laravel-Specific Features
 
 ### 1. Automatic Service Discovery
-- Package automatically registers with Laravel
+- Package automatically registers with Laravel 9.x, 10.x, 11.x, and 12.x
 - No manual service provider registration needed
 - Facade automatically available
 
