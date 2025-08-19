@@ -114,6 +114,9 @@ php artisan vendor:publish --tag=azampay-routes
 - Uses Laravel's logging system
 - Configurable log channels
 - Structured logging for debugging
+- **Activity Log Integration**: Database-stored activities with Spatie
+- **Unauthenticated Support**: Handles API requests without user sessions
+- **Rich Context**: IP addresses, user agents, request IDs, and metadata
 
 ## Usage Patterns
 

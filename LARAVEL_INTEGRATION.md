@@ -226,7 +226,9 @@ The package automatically integrates with Spatie's Activity Log package for stru
 #### Activity Log Features
 
 - **Database Storage**: All activities are stored in the database
-- **User Tracking**: Activities are linked to authenticated users
+- **User Tracking**: Activities are linked to authenticated users when available
+- **Unauthenticated Support**: Gracefully handles API requests without authentication
+- **Rich Context**: IP address, user agent, request ID, and other request metadata
 - **Structured Data**: Rich context data for each activity
 - **Privacy Protection**: Sensitive data is automatically sanitized
 - **Fallback Logging**: Graceful fallback to standard logging if Activity Log is unavailable
@@ -296,6 +298,21 @@ For testing, set `AZAMPAY_ENV=SANDBOX` in your `.env.testing` file.
 
 The package automatically logs all AzamPay activities. You can access the logs using Spatie's Activity Log:
 
+#### Authenticated vs Unauthenticated Requests
+
+The package intelligently handles both scenarios:
+
+**Authenticated Requests:**
+- User ID is automatically captured and linked to activities
+- Full user attribution for audit trails
+- Personal dashboard and reporting
+
+**Unauthenticated Requests (API/Webhooks):**
+- No user ID required - works seamlessly
+- Rich context data (IP, user agent, request ID)
+- Perfect for webhook handling and public APIs
+- Maintains security and privacy standards
+
 ```php
 use Spatie\Activitylog\Models\Activity;
 
@@ -318,6 +335,53 @@ $webhooks = Activity::inLog('azampay')
     ->latest()
     ->take(10)
     ->get();
+
+// Get unauthenticated requests
+$unauthenticatedRequests = Activity::inLog('azampay')
+    ->whereJsonContains('properties->authenticated', false)
+    ->get();
+
+// Get activities by IP address (useful for security monitoring)
+$suspiciousIPs = Activity::inLog('azampay')
+    ->whereJsonContains('properties->ip_address', '192.168.1.100')
+    ->get();
+
+// Get activities with specific request context
+$apiRequests = Activity::inLog('azampay')
+    ->whereJsonContains('properties->method', 'POST')
+    ->whereJsonContains('properties->url', '/api/azampay/checkout')
+    ->get();
+```
+
+## API Scenarios
+
+### 1. Authenticated User Requests
+```php
+// User is logged in - full tracking available
+$response = Azampay::checkout($payload);
+// Result: Activity logged with user ID, IP, user agent, etc.
+```
+
+### 2. Unauthenticated API Requests
+```php
+// Public API endpoint - no authentication required
+Route::post('/api/public/checkout', [PaymentController::class, 'publicCheckout']);
+// Result: Activity logged with IP, user agent, request ID (no user ID)
+```
+
+### 3. Webhook Handling
+```php
+// AzamPay webhook - external system calling your endpoint
+Route::post('/azampay/webhook', [AzampayController::class, 'webhook']);
+// Result: Activity logged with webhook source, IP, headers (no user ID)
+```
+
+### 4. Mobile App Integration
+```php
+// Mobile app with API key but no user session
+Route::post('/api/mobile/checkout', [MobileController::class, 'checkout'])
+    ->middleware('api.key');
+// Result: Activity logged with API key context, IP, user agent (no user ID)
 ```
 
 ## Security Considerations
@@ -326,6 +390,8 @@ $webhooks = Activity::inLog('azampay')
 2. **Environment Variables**: Never commit sensitive credentials to version control
 3. **HTTPS**: Use HTTPS in production for all payment-related endpoints
 4. **Validation**: Always validate payment payloads before processing
+5. **Unauthenticated Requests**: Monitor and log all API access for security
+6. **IP Tracking**: Use IP addresses for rate limiting and security monitoring
 
 ## Troubleshooting
 

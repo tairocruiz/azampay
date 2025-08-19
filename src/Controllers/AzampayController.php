@@ -17,7 +17,8 @@ class AzampayController extends Controller
     public function webhook(Request $request): JsonResponse
     {
         $activityLogger = new ActivityLoggerService();
-        $userId = auth()->id(); // Get current user ID if authenticated
+        $userId = $activityLogger->getCurrentUserId(); // Safe user ID extraction
+        $context = $activityLogger->extractRequestContext($request);
         
         try {
             $callback = app('azampay.callback');
@@ -28,7 +29,8 @@ class AzampayController extends Controller
                 $request->headers->all(),
                 $request->getContent(),
                 'success',
-                $userId
+                $userId,
+                $context
             );
             
             return response()->json(['success' => true]);
@@ -38,7 +40,7 @@ class AzampayController extends Controller
                 'exception' => $e->getMessage(),
                 'request' => $request->all(),
                 'trace' => $e->getTraceAsString()
-            ], $userId);
+            ], $userId, $context);
             
             return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
         }
@@ -50,7 +52,8 @@ class AzampayController extends Controller
     public function checkout(Request $request): JsonResponse
     {
         $activityLogger = new ActivityLoggerService();
-        $userId = auth()->id(); // Get current user ID if authenticated
+        $userId = $activityLogger->getCurrentUserId(); // Safe user ID extraction
+        $context = $activityLogger->extractRequestContext($request);
         
         try {
             $payload = $request->validate([
@@ -63,7 +66,7 @@ class AzampayController extends Controller
             $response = app('azampay')->checkout($payload);
             
             // Log successful payment checkout
-            $activityLogger->logPaymentCheckout($payload, $response, $userId);
+            $activityLogger->logPaymentCheckout($payload, $response, $userId, $context);
             
             return response()->json($response);
         } catch (Exception $e) {
@@ -72,7 +75,7 @@ class AzampayController extends Controller
                 'exception' => $e->getMessage(),
                 'payload' => $request->all(),
                 'trace' => $e->getTraceAsString()
-            ], $userId);
+            ], $userId, $context);
             
             return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
         }
@@ -84,7 +87,8 @@ class AzampayController extends Controller
     public function status(string $reference): JsonResponse
     {
         $activityLogger = new ActivityLoggerService();
-        $userId = auth()->id(); // Get current user ID if authenticated
+        $userId = $activityLogger->getCurrentUserId(); // Safe user ID extraction
+        $context = $activityLogger->extractRequestContext();
         
         try {
             // This is a placeholder - implement your status checking logic
@@ -93,7 +97,7 @@ class AzampayController extends Controller
             $status = 'pending'; // Placeholder status
             
             // Log status check
-            $activityLogger->logStatusCheck($reference, $status, $userId);
+            $activityLogger->logStatusCheck($reference, $status, $userId, $context);
             
             return response()->json([
                 'reference' => $reference,
@@ -106,7 +110,7 @@ class AzampayController extends Controller
                 'exception' => $e->getMessage(),
                 'reference' => $reference,
                 'trace' => $e->getTraceAsString()
-            ], $userId);
+            ], $userId, $context);
             
             return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
         }
