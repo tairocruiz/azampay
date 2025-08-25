@@ -11,7 +11,7 @@ A robust PHP package for seamless integration with Azampay payment services, sup
 - Environment switching (Sandbox/Production)
 - Simple credential management
 - Flexible service selection
-- **Laravel 9.x, 10.x, and 11.x support**
+- **Laravel 9.x, 10.x, 11.x, and 12.x support**
 - **Automatic service discovery and registration**
 - **Built-in facades and dependency injection**
 - **Spatie Activity Log integration for database logging**
@@ -28,7 +28,7 @@ composer require taitech/azampay
 ### Requirements
 
 - **PHP**: ^8.1
-- **Laravel**: ^9.0|^10.0|^11.0
+- **Laravel**: ^9.0|^10.0|^11.0|^12.0
 - **GuzzleHTTP**: ^7.5
 
 ### Laravel Integration
@@ -181,6 +181,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [1.1.0] - 2024-12-19
+
+### Added
+- Laravel 12.x compatibility and support
+- Enhanced version compatibility across Laravel 9.x, 10.x, 11.x, and 12.x
 
 ## [1.0.0] - 2024-01-01
 

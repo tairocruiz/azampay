@@ -7,7 +7,8 @@ This guide explains how to integrate the Azampay package into your Laravel appli
 This package is compatible with:
 - **Laravel 9.x** (LTS)
 - **Laravel 10.x** (LTS)
-- **Laravel 11.x** (Latest)
+- **Laravel 11.x** (LTS)
+- **Laravel 12.x** (Latest)
 
 **Minimum Requirements:**
 - PHP ^8.1
@@ -401,7 +402,7 @@ Route::post('/api/mobile/checkout', [MobileController::class, 'checkout'])
 2. **Configuration Missing**: Check that all required environment variables are set
 3. **Webhook Failures**: Verify webhook secret and route configuration
 4. **Authentication Errors**: Confirm client ID and secret are correct
-5. **Version Compatibility**: Ensure you're using Laravel 9.x, 10.x, or 11.x
+5. **Version Compatibility**: Ensure you're using Laravel 9.x, 10.x, 11.x, or 12.x
 6. **Composer Conflicts**: Check for package version conflicts
 
 ### Debug Mode
