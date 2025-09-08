@@ -1,5 +1,23 @@
+# Ignore public directory
 /public
+
+# Ignore test files
 tester.php
+
+# Ignore logs
 /logs
+
+# Ignore Composer dependencies
 /vendor
-.gitignore
+
+# Ignore environment files
+.env
+.env.local
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore IDE-specific files
+.vscode/
+.idea/
